@@ -6,7 +6,7 @@ You would like to follow the practice from video 44.
 
 ## You would want to check out these files
 [src/App.js](https://github.com/wengair/react-example/blob/index-example/src/App.js)  
-What happens here is I have 2 components, `Nav` and `Landing`, and I call them one by one.  
+What happens here is I have 2 components, `Nav` and `Landing` (they're in the `src/views` folder), and I call them one by one.  
 Since both of them return HTML elements, it works just like we write a static HTML file, the `Landing`'s HTML would go after `Nav`'s HTML.  
 So inside here equals to
 ```HTML
@@ -14,9 +14,7 @@ So inside here equals to
   <div>Nav's content</div>
   <div>Landing's content</div>
 </body>
-```
-[src/components/Nav.js](https://github.com/wengair/react-example/blob/index-example/src/components/Nav.js)  
-[src/components/Landing.js](https://github.com/wengair/react-example/blob/index-example/src/components/Landing.js)  
+```  
 
 ### Basic concept
 #### Functional Programming
