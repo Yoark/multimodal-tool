@@ -144,7 +144,7 @@ return (
     <img src={Logo} alt='App Logo' className='logo-img' />
     <p>Sous Chef</p>
     <button>Log in</button>
-    <style jsx>
+    <style jsx='true'>
       {`
       .nav-container {
         height: 75px;
