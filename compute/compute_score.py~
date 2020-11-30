@@ -81,7 +81,7 @@ def compute_metric_inference(gens_list, refs_list, calculate_diversity=False, tr
             output[method] = score
             print(method, score)
 
-    return json.dumps(output)
+    return output
 
 def split_sample(inst, inf_name, event):
     ins = copy.deepcopy(inst)
