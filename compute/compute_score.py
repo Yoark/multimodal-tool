@@ -1,11 +1,13 @@
-# get gens_list, refs_list
+import json
+import copy
+import argparse
+
 from pycocoevalcap.tokenizer.ptbtokenizer import PTBTokenizer
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
 from pycocoevalcap.cider.cider import Cider
 
 from tqdm import tqdm
-import json
 import numpy as np
 import os
 import time
@@ -80,3 +82,34 @@ def compute_metric_inference(gens_list, refs_list, calculate_diversity=False, tr
             print(method, score)
 
     return output
+
+def split_sample(inst, inf_name, event):
+    ins = copy.deepcopy(inst)
+    ins['inference_relation'] = inf_name
+    ins['generations'] = [event[inf_name]]
+    ins['event_idx'] = event['event_idx']
+    return ins
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--refs_file", type=str, required=True)
+    parser.add_argument("--gens_file", type=str, required=True)
+    args = parser.parse_args()
+    
+    samples = json.load(open(args.gens_file)) # the predicted results
+    refs_list = json.load(open(args.refs_file)) # the val_annots locations
+
+    excluded = ['inference_relation', 'generations', 'intents', 'befores', 'afters', 'bad', 'events']
+
+    # convert the group (samples) to correct format: gens_list
+    gens_list = []
+    for sample in samples:
+        inst = {k:v for k,v in sample.items() if k not in excluded}
+        new_sample = []
+        for event in sample['events']:
+            new_sample.append(split_sample(inst, 'intent', event))
+            new_sample.append(split_sample(inst, 'before', event))
+            new_sample.append(split_sample(inst, 'after', event))
+        gens_list.extend(new_sample)
+
+    compute_metric_inference(gens_list, refs_list, calculate_diversity=False, train_file=None)
