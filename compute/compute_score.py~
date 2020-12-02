@@ -101,17 +101,15 @@ if __name__ == "__main__":
 
     excluded = ['inference_relation', 'generations', 'intents', 'befores', 'afters', 'bad', 'events']
 
-    # convert 1 sample to correct format for computing metrics
-    inst = {k:v for k,v in samples[0].items() if k not in excluded}
+    # convert the group (samples) to correct format: gens_list
+    gens_list = []
+    for sample in samples:
+        inst = {k:v for k,v in sample.items() if k not in excluded}
+        new_sample = []
+        for event in sample['events']:
+            new_sample.append(split_sample(inst, 'intent', event))
+            new_sample.append(split_sample(inst, 'before', event))
+            new_sample.append(split_sample(inst, 'after', event))
+        gens_list.extend(new_sample)
 
-
-
-    new_sample = []
-    for event in samples[0]['events']:
-        new_sample.append(split_sample(inst, 'intent', event))
-        new_sample.append(split_sample(inst, 'before', event))
-        new_sample.append(split_sample(inst, 'after', event))
-
-
-
-    compute_metric_inference(new_sample, refs_list, calculate_diversity=False, train_file=None)
+    compute_metric_inference(gens_list, refs_list, calculate_diversity=False, train_file=None)
