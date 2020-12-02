@@ -27,7 +27,7 @@ def compute_metric_inference(gens_list, refs_list, calculate_diversity=False, tr
     preds = {}
     output = {}
     cnt = 0
-
+    print('before run first for')
     for i, gens in tqdm(enumerate(gens_list)):
         event_idx = gens['event_idx']
         relation = gens['inference_relation']
@@ -80,7 +80,7 @@ def compute_metric_inference(gens_list, refs_list, calculate_diversity=False, tr
         else:
             output[method] = score
             print(method, score)
-
+    print(output)
     return json.dumps(output)
 
 def split_sample(inst, inf_name, event):
@@ -91,16 +91,29 @@ def split_sample(inst, inf_name, event):
     return ins
 
 if __name__ == "__main__":
+    print('begin python')
+    import os
+    print(os.getcwd())
     parser = argparse.ArgumentParser()
-    parser.add_argument("--refs_file", type=str, required=True)
-    parser.add_argument("--gens_file", type=str, required=True)
+    parser.add_argument("--refs_file", type=str, default='./frontend/public/data/val_annots.json')
+    parser.add_argument("--gens_file", type=str, default='../frontend/public/data/200_sample_val_conv.json')
+    parser.add_argument("--event_idx", type=str)
+    parser.add_argument("--relation", type=str)
+    parser.add_argument("--ref", type=str)
     args = parser.parse_args()
-    
-    samples = json.load(open(args.gens_file)) # the predicted results
-    refs_list = json.load(open(args.refs_file)) # the val_annots locations
+    print(args.gens_file)
+    # samples  = json.load(args.gens_file)
+    # print(samples[0])
+    print('after parse args')
+    # with open(args.gens_file) as f:
+    #     samples = json.load(f)
+    # with open(args.refs_file) as f:
+    #     refs_list = json.load(f)
+    samples = json.loads(args.gens_file) # the predicted results
+    refs_list = json.loads(args.refs_file) # the val_annots locations
 
     excluded = ['inference_relation', 'generations', 'intents', 'befores', 'afters', 'bad', 'events']
-
+    print('after load json')
     # convert the group (samples) to correct format: gens_list
     gens_list = []
     for sample in samples:
@@ -111,5 +124,5 @@ if __name__ == "__main__":
             new_sample.append(split_sample(inst, 'before', event))
             new_sample.append(split_sample(inst, 'after', event))
         gens_list.extend(new_sample)
-
+    print('before run function')
     compute_metric_inference(gens_list, refs_list, calculate_diversity=False, train_file=None)

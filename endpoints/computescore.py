@@ -13,7 +13,27 @@ import os
 import time
 import sys
 
-def compute_metric_inference(gens_list, refs_list, calculate_diversity=False, train_file=None):
+def compute_metric_inference(gens_list_JSON, refs_file, calculate_diversity=False, train_file=None):
+    # print(gens_list_JSON)
+    # print(refs_file)
+    with open(refs_file) as f:
+        refs_list = json.load(f)
+    # print('refs_list')
+    # print(refs_list)
+    excluded = ['inference_relation', 'generations', 'intents', 'befores', 'afters', 'bad', 'events']
+    gens_list_good = json.loads(gens_list_JSON)
+    # print('after load json')
+    # convert the group (samples) to correct format: gens_list
+    gens_list = []
+    for sample in gens_list_good:
+        inst = {k:v for k,v in sample.items() if k not in excluded}
+        new_sample = []
+        for event in sample['events']:
+            # print(event)
+            new_sample.append(split_sample(inst, 'intent', event))
+            new_sample.append(split_sample(inst, 'before', event))
+            new_sample.append(split_sample(inst, 'after', event))
+        gens_list.extend(new_sample)
     # gens_list, refs_list is a list of generation json and a list of reference json, and I provide a 
     # convert function also.
     scorers = [
@@ -27,7 +47,7 @@ def compute_metric_inference(gens_list, refs_list, calculate_diversity=False, tr
     preds = {}
     output = {}
     cnt = 0
-
+    print('before run first for')
     for i, gens in tqdm(enumerate(gens_list)):
         event_idx = gens['event_idx']
         relation = gens['inference_relation']
@@ -80,8 +100,8 @@ def compute_metric_inference(gens_list, refs_list, calculate_diversity=False, tr
         else:
             output[method] = score
             print(method, score)
-
-    return output
+    print(json.dumps(output))
+    return json.dumps(output)
 
 def split_sample(inst, inf_name, event):
     ins = copy.deepcopy(inst)
@@ -92,24 +112,37 @@ def split_sample(inst, inf_name, event):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--refs_file", type=str, required=True)
-    parser.add_argument("--gens_file", type=str, required=True)
+    parser.add_argument("--refs_file", type=str, default='./frontend/public/data/val_annots.json')
+    parser.add_argument("--gens_file", type=str, default='./frontend/public/data/200_sample_val_conv.json')
     args = parser.parse_args()
+    # print(args.gens_file)
+    # samples  = json.load(args.gens_file)
+    # with open('./frontend/public/data/200_sample_val_conv.json') as f:
+        # origin = json.load(f)
+    # print("this is origin\n", origin)
+    # samples = json.loads(args.gens_file) # the predicted results
+    # print(samples)
+    # print('this is from jsonstring\n', samples)
+    # print(samples[0])
+    # print('after parse args')
+    # with open(args.gens_file) as f:
+    #     samples = json.load(f)
+    # print(type(samples))
     
-    samples = json.load(open(args.gens_file)) # the predicted results
-    refs_list = json.load(open(args.refs_file)) # the val_annots locations
+    # refs_list = json.loads(args.refs_file) # the val_annots locations
 
-    excluded = ['inference_relation', 'generations', 'intents', 'befores', 'afters', 'bad', 'events']
+    # excluded = ['inference_relation', 'generations', 'intents', 'befores', 'afters', 'bad', 'events']
+    # # print('after load json')
+    # # convert the group (samples) to correct format: gens_list
+    # gens_list = []
+    # for sample in samples:
+    #     inst = {k:v for k,v in sample.items() if k not in excluded}
+    #     new_sample = []
+    #     for event in sample['events']:
+    #         # print(event)
+    #         new_sample.append(split_sample(inst, 'intent', event))
+    #         new_sample.append(split_sample(inst, 'before', event))
+    #         new_sample.append(split_sample(inst, 'after', event))
+    #     gens_list.extend(new_sample)
 
-    # convert the group (samples) to correct format: gens_list
-    gens_list = []
-    for sample in samples:
-        inst = {k:v for k,v in sample.items() if k not in excluded}
-        new_sample = []
-        for event in sample['events']:
-            new_sample.append(split_sample(inst, 'intent', event))
-            new_sample.append(split_sample(inst, 'before', event))
-            new_sample.append(split_sample(inst, 'after', event))
-        gens_list.extend(new_sample)
-
-    compute_metric_inference(gens_list, refs_list, calculate_diversity=False, train_file=None)
+    compute_metric_inference(args.gens_file, args.refs_file, calculate_diversity=False, train_file=None)
