@@ -1,7 +1,7 @@
 import json
 import copy
 
-samples = json.load(open('./Compare/200_sample_val_conv.json'))
+samples = json.load(open('../public/data/200_sample_val_conv.json') # /Compare/200_sample_val_conv.json'))
 excluded = ['inference_relation', 'generations', 'intents', 'befores', 'afters', 'bad', 'events']
 
 # convert 1 sample to correct format for computing metrics
