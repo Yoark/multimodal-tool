@@ -6,11 +6,13 @@ import ComparisonInstanceList from './views/ComparisonInstanceList'
 import ComparisonScatterPlot from './views/ComparisonScatterPlot'
 import ExploreSingleInstance from './views/ExploreSingleInstance'
 import ComparisonSingleInstance from './views/ComparisonSingleInstance'
+import DataContext from './components/DataContext'
 import './App.css'
 
 function App() {
   return (
     <Router>
+      <DataContext>
         <Nav />
         {/* make path '/explore/instances' as our landing page */}
         <Redirect from='/' to='/explore/instances' />
@@ -21,6 +23,7 @@ function App() {
         <Route path='/comparison/instances' exact component={ComparisonInstanceList} />
         <Route path='/comparison/instances/:id' exact component={ComparisonSingleInstance} />
         <Route path='/comparison/plot' exact component={ComparisonScatterPlot} />
+      </DataContext>
     </Router>
   )
 }
